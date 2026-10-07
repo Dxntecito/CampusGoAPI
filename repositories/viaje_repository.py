@@ -1,4 +1,5 @@
 class ViajeRepository:
+    
     def __init__(self, connection):
         self.connection = connection
 
@@ -36,96 +37,90 @@ class ViajeRepository:
             cursor.close()
 
     def listar(self, origen=None, destino=None, fecha=None, estado=None):
-            cursor = self.connection.cursor()
-            try:
-                sql = """
-                    SELECT 
-                        v.id, v.origen, v.destino, v.fecha, v.hora,
-                        v.cupos, v.precio, v.estado,
-                        CONCAT(u.nombres, ' ', u.apellidos) AS conductor
-                    FROM viaje v
-                    INNER JOIN conductor c ON c.id = v.conductor_id
-                    INNER JOIN usuario u ON u.id = c.usuario_id
-                    WHERE 1 = 1
-                """
-                params = []
+        cursor = self.connection.cursor()
+        try:
+            sql = """
+                SELECT
+                    v.id, v.origen, v.destino, v.fecha, v.hora,
+                    v.cupos, v.precio, v.estado,
+                    CONCAT(u.nombres, ' ', u.apellidos) AS conductor
+                FROM viaje v
+                INNER JOIN conductor c ON c.id = v.conductor_id
+                INNER JOIN usuario u ON u.id = c.usuario_id
+                WHERE 1 = 1
+            """
+            params = []
 
-                if origen:
-                    sql += " AND v.origen LIKE %s"
-                    params.append(f"%{origen}%")
+            if origen:
+                sql += " AND v.origen LIKE %s"
+                params.append(f"%{origen}%")
 
-                if destino:
-                    sql += " AND v.destino LIKE %s"
-                    params.append(f"%{destino}%")
+            if destino:
+                sql += " AND v.destino LIKE %s"
+                params.append(f"%{destino}%")
 
-                if fecha:
-                    sql += " AND v.fecha = %s"
-                    params.append(fecha)
+            if fecha:
+                sql += " AND v.fecha = %s"
+                params.append(fecha)
 
-                if estado:
-                    sql += " AND v.estado = %s"
-                    params.append(estado)
+            if estado:
+                sql += " AND v.estado = %s"
+                params.append(estado)
 
-                sql += " ORDER BY v.fecha, v.hora"
+            sql += " ORDER BY v.fecha, v.hora"
 
-                cursor.execute(sql, tuple(params))
-                return cursor.fetchall()
-            finally:
-                cursor.close()
+            cursor.execute(sql, tuple(params))
+            return cursor.fetchall()
+        finally:
+            cursor.close()
 
     def obtener_por_id(self, viaje_id):
-            cursor = self.connection.cursor()
-            try:
-                sql = """
-                    SELECT 
-                        v.*, c.usuario_id AS conductor_usuario_id
-                    FROM viaje v
-                    INNER JOIN conductor c ON c.id = v.conductor_id
-                    WHERE v.id = %s
-                """
-                cursor.execute(sql, (viaje_id,))
-                return cursor.fetchone()
-            finally:
-                cursor.close()
+        cursor = self.connection.cursor()
+        try:
+            sql = """
+                SELECT
+                    v.*, c.usuario_id AS conductor_usuario_id
+                FROM viaje v
+                INNER JOIN conductor c ON c.id = v.conductor_id
+                WHERE v.id = %s
+            """
+            cursor.execute(sql, (viaje_id,))
+            return cursor.fetchone()
+        finally:
+            cursor.close()
 
     def actualizar(self, viaje_id, datos):
-            cursor = self.connection.cursor()
-            try:
-                sql = """
-                    UPDATE viaje
-                    SET origen = %s,
-                        destino = %s,
-                        fecha = %s,
-                        hora = %s,
-                        cupos = %s,
-                        precio = %s
-                    WHERE id = %s
-                """
-                cursor.execute(
-                    sql,
-                    (
-                        datos["origen"],
-                        datos["destino"],
-                        datos["fecha"],
-                        datos["hora"],
-                        datos["cupos"],
-                        datos["precio"],
-                        viaje_id,
-                    ),
-                )
-                return cursor.rowcount
-            finally:
-                cursor.close()
+        cursor = self.connection.cursor()
+        try:
+            sql = """
+                UPDATE viaje
+                SET origen = %s,
+                    destino = %s,
+                    fecha = %s,
+                    hora = %s,
+                    cupos = %s,
+                    precio = %s
+                WHERE id = %s
+            """
+            cursor.execute(sql, (
+                datos["origen"], datos["destino"],
+                datos["fecha"], datos["hora"],
+                datos["cupos"], datos["precio"],
+                viaje_id
+            ))
+            return cursor.rowcount
+        finally:
+            cursor.close()
 
     def cancelar(self, viaje_id):
-            cursor = self.connection.cursor()
-            try:
-                sql = """
-                    UPDATE viaje
-                    SET estado = 'CANCELADO'
-                    WHERE id = %s
-                """
-                cursor.execute(sql, (viaje_id,))
-                return cursor.rowcount
-            finally:
-                cursor.close()
+        cursor = self.connection.cursor()
+        try:
+            sql = """
+                UPDATE viaje
+                SET estado = 'CANCELADO'
+                WHERE id = %s
+            """
+            cursor.execute(sql, (viaje_id,))
+            return cursor.rowcount
+        finally:
+            cursor.close()

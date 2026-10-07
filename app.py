@@ -1,15 +1,20 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from config import Config
+from utils.json_provider import CustomJSONProvider
+
 from routes.auth_routes import auth_bp
 from routes.usuario_routes import usuario_bp
 from routes.viaje_routes import viaje_bp
-from routes.reservas_routes import reserva_bp
+from routes.reserva_routes import reserva_bp
 import os
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    # JSON personalizado
+    app.json = CustomJSONProvider(app)
 
     JWTManager(app)
 

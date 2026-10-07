@@ -4,8 +4,7 @@ from database import get_connection
 USUARIOS = [
     ("juan.perez@usat.edu.pe", "CampusGo#2026", "Juan", "Pérez Sánchez", "PASAJERO", "ACTIVO"),
     ("carlos.mendoza@usat.edu.pe", "CampusGo#2026", "Carlos", "Mendoza Ruiz", "CONDUCTOR", "ACTIVO"),
-    ("admin@campusgo.pe", "CampusGo#2026", "Administrador", "CampusGo", "ADMINISTRADOR", "ACTIVO"),
-    ("hmera@usat.edu.pe", "CampusGo#2026", "Huilder", "Mera Montenegro", "ADMINISTRADOR", "ACTIVO")
+    ("admin@campusgo.pe", "CampusGo#2026", "Administrador", "CampusGo", "ADMINISTRADOR", "ACTIVO")
 ]
 
 def main():
@@ -31,7 +30,7 @@ def main():
                 sql,
                 (
                     email,
-                    generate_password_hash(password, method="pbkdf2:sha256"),
+                    generate_password_hash(password),
                     nombres,
                     apellidos,
                     rol,

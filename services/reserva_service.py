@@ -132,3 +132,45 @@ class ReservaService:
         finally:
             connection.close()
 
+    def cancelar(self, usuario_id, reserva_id):
+        connection = get_connection()
+
+        try:
+            connection.begin()
+            repository = ReservaRepository(connection)
+            reserva = repository.obtener_para_cancelar(reserva_id)
+
+            if reserva is None:
+                connection.rollback()
+                return None, "Reserva no encontrada", 404
+
+            if str(reserva["usuario_id"]) != str(usuario_id):
+                connection.rollback()
+                return None, "No puede cancelar una reserva de otro pasajero", 403
+
+            if reserva["estado"] == "CANCELADA":
+                connection.rollback()
+                return None, "La reserva ya se encuentra cancelada", 409
+
+            detalles = repository.obtener_detalles_para_cancelar(reserva_id)
+
+            for detalle in detalles:
+                repository.devolver_cupos(
+                    detalle["viaje_id"],
+                    detalle["cantidad"]
+                )
+
+            repository.cancelar_detalles(reserva_id)
+            repository.cancelar_reserva(reserva_id)
+            connection.commit()
+
+            return {
+                "reserva_id": reserva_id
+            }, "Reserva cancelada correctamente", 200
+
+        except Exception:
+            connection.rollback()
+            raise
+
+        finally:
+            connection.close()

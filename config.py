@@ -7,8 +7,8 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Config:
-    MYSQL_HOST = os.getenv("MYSQL_HOST", "mysql.railway.internal")
-    MYSQL_PORT = int(os.getenv("MYSQL_PORT", "3306"))
+    MYSQL_HOST = os.getenv("MYSQL_HOST", "yamanote.proxy.rlwy.net")
+    MYSQL_PORT = int(os.getenv("MYSQL_PORT", "13899"))
     MYSQL_USER = os.getenv("MYSQL_USER", "root")
     MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "CbVPTRnszcPLtrjBzhakQbRBaNyKaega")
     MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "campusgo")

@@ -1,6 +1,7 @@
 from database import get_connection
 from repositories.viaje_repository import ViajeRepository
-from datetime import date, timedelta
+from datetime import date, time, timedelta
+from decimal import Decimal
 
 class ViajeService:
 
@@ -48,10 +49,25 @@ class ViajeService:
                 filtros.get("fecha"),
                 filtros.get("estado")
             )
-            #for viaje in viajes:
-                #if isinstance(viaje.get("hora"), timedelta):
-                    #viaje["hora"] = str(viaje["hora"])
-                    
+
+            for viaje in viajes:
+                if isinstance(viaje.get("fecha"), date):
+                    viaje["fecha"] = viaje["fecha"].strftime("%d-%m-%Y")
+
+                hora = viaje.get("hora")
+                if isinstance(hora, timedelta):
+                    total_segundos = int(hora.total_seconds())
+                    horas, resto = divmod(total_segundos, 3600)
+                    minutos, segundos = divmod(resto, 60)
+                    viaje["hora"] = (
+                        f"{horas:02d}:{minutos:02d}:{segundos:02d}"
+                    )
+                elif isinstance(hora, time):
+                    viaje["hora"] = hora.strftime("%H:%M:%S")
+
+                if isinstance(viaje.get("precio"), Decimal):
+                    viaje["precio"] = float(viaje["precio"])
+
             return viajes, "Viajes obtenidos correctamente", 200
         finally:
             connection.close()

@@ -18,7 +18,7 @@ class UsuarioService:
                 return None, "El usuario se encuentra inactivo", 403
 
             data = {
-                "usuario_id": usuario["id"],
+                "id": usuario["id"],
                 "email": usuario["email"],
                 "nombres": usuario["nombres"],
                 "apellidos": usuario["apellidos"],
@@ -26,7 +26,7 @@ class UsuarioService:
                 "rol": usuario["rol"],
                 "estado": usuario["estado"],
                 "fecha_registro": (
-                usuario["fecha_registro"].isoformat()
+                usuario["fecha_registro"].strftime("%Y-%m-%d %H:%M:%S")
                 if usuario["fecha_registro"] is not None
                 else None
                 )

@@ -76,16 +76,47 @@ class ViajeService:
         connection = get_connection()
         try:
             repository = ViajeRepository(connection)
-            viaje = repository.obtener_por_id(viaje_id)
+            viaje = repository.obtener_detalle(viaje_id)
             if viaje is None:
                 return None, "Viaje no encontrado", 404
-            if isinstance(viaje.get("hora"), timedelta):
-                viaje["hora"] = str(viaje["hora"])
 
             if isinstance(viaje.get("fecha"), date):
-                viaje["fecha"] = viaje["fecha"].isoformat()
+                viaje["fecha"] = viaje["fecha"].strftime("%d-%m-%Y")
 
-            return viaje, "Viaje obtenido correctamente", 200
+            hora = viaje.get("hora")
+            if isinstance(hora, timedelta):
+                total_segundos = int(hora.total_seconds())
+                horas, resto = divmod(total_segundos, 3600)
+                minutos, segundos = divmod(resto, 60)
+                viaje["hora"] = f"{horas:02d}:{minutos:02d}:{segundos:02d}"
+            elif isinstance(hora, time):
+                viaje["hora"] = hora.strftime("%H:%M:%S")
+
+            if isinstance(viaje.get("precio"), Decimal):
+                viaje["precio"] = float(viaje["precio"])
+
+            detalle = {
+                "id": viaje["id"],
+                "origen": viaje["origen"],
+                "destino": viaje["destino"],
+                "fecha": viaje["fecha"],
+                "hora": viaje["hora"],
+                "precio": viaje["precio"],
+                "estado": viaje["estado"],
+                "cupos": viaje["cupos"],
+                "conductor": {
+                    "nombre": viaje["conductor_nombre"],
+                    "foto": viaje["conductor_foto"],
+                    "vehiculo": {
+                        "modelo": viaje["vehiculo_modelo"],
+                        "placa": viaje["vehiculo_placa"],
+                        "color": viaje["vehiculo_color"],
+                    },
+                },
+                "pasajeros": viaje["pasajeros"],
+            }
+
+            return detalle, "Detalle del viaje obtenido", 200
         finally:
             connection.close()
 

@@ -89,6 +89,58 @@ class ViajeRepository:
         finally:
             cursor.close()
 
+    def obtener_detalle(self, viaje_id):
+        cursor = self.connection.cursor()
+        try:
+            sql_viaje = """
+                SELECT
+                    v.id,
+                    v.origen,
+                    v.destino,
+                    v.fecha,
+                    v.hora,
+                    v.precio,
+                    v.estado,
+                    v.cupos,
+                    CONCAT(uu.nombres, ' ', uu.apellidos) AS conductor_nombre,
+                    c.foto_conductor AS conductor_foto,
+                    ve.modelo AS vehiculo_modelo,
+                    ve.placa AS vehiculo_placa,
+                    ve.color AS vehiculo_color
+                FROM viaje AS v
+                INNER JOIN conductor AS c ON c.id = v.conductor_id
+                INNER JOIN usuario AS uu ON uu.id = c.usuario_id
+                LEFT JOIN vehiculo AS ve ON ve.conductor_id = c.id
+                WHERE v.id = %s
+                LIMIT 1
+            """
+            cursor.execute(sql_viaje, (viaje_id,))
+            viaje = cursor.fetchone()
+
+            if viaje is None:
+                return None
+
+            sql_pasajeros = """
+                SELECT DISTINCT
+                    up.id,
+                    CONCAT(up.nombres, ' ', up.apellidos) AS nombre
+                FROM reserva_viaje AS rv
+                INNER JOIN reserva AS r ON r.id = rv.reserva_id
+                INNER JOIN pasajero AS p ON p.id = r.pasajero_id
+                INNER JOIN usuario AS up ON up.id = p.usuario_id
+                WHERE rv.viaje_id = %s
+                  AND rv.estado = 'CONFIRMADA'
+                  AND r.estado = 'CONFIRMADA'
+                ORDER BY up.id
+            """
+            cursor.execute(sql_pasajeros, (viaje_id,))
+            pasajeros = cursor.fetchall()
+
+            viaje["pasajeros"] = pasajeros
+            return viaje
+        finally:
+            cursor.close()
+
     def actualizar(self, viaje_id, datos):
         cursor = self.connection.cursor()
         try:

@@ -63,3 +63,16 @@ CREATE TABLE reserva_viaje (
     FOREIGN KEY (viaje_id) REFERENCES viaje(id),
     UNIQUE (reserva_id, viaje_id)
 );
+
+ALTER TABLE conductor
+ADD COLUMN foto_conductor VARCHAR(255) NULL AFTER calificacion;
+
+CREATE TABLE vehiculo (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    conductor_id INT NOT NULL,
+    modelo VARCHAR(100) NOT NULL,
+    placa VARCHAR(15) NOT NULL UNIQUE,
+    color VARCHAR(30) NOT NULL,
+    capacidad INT NOT NULL DEFAULT 4,
+    CONSTRAINT fk_vehiculo_conductor FOREIGN KEY (conductor_id) REFERENCES conductor(id) ON DELETE CASCADE
+);

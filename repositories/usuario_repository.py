@@ -52,12 +52,7 @@ class UsuarioRepository:
 
     def obtener_foto_por_usuario(self, usuario_id):
         """
-        Devuelve únicamente los datos necesarios para autorizar
-        y localizar la foto del usuario autenticado.
-
-        La base de datos del esquema actual no incluye una columna
-        `foto`, así que se usa el nombre por defecto del archivo
-        del usuario y se resuelve en la carpeta de perfiles.
+        Devuelve los datos necesarios para localizar la foto del usuario.
         """
         cursor = self.connection.cursor()
         try:

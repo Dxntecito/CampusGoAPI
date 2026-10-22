@@ -37,8 +37,11 @@ class UsuarioService:
             connection.close()
 
     def obtener_foto_perfil(self, usuario_id):
+        return self.obtener_foto_usuario(usuario_id)
+
+    def obtener_foto_usuario(self, usuario_id):
         """
-        Obtiene la ruta privada de la foto del usuario autenticado.
+        Obtiene la ruta privada de la foto de un usuario.
 
         Retorna:
             ruta_archivo, mimetype, mensaje, http_code

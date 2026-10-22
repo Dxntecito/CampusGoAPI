@@ -62,3 +62,31 @@ def obtener_foto_perfil():
             "No fue posible obtener la foto de perfil",
             500
         )
+
+@usuario_bp.route("/api/usuarios/<int:usuario_id>/foto", methods=["GET"])
+@jwt_required()
+def obtener_foto_usuario(usuario_id):
+    """Devuelve la foto del usuario indicada, para usuarios autenticados."""
+    try:
+        ruta_archivo, mimetype, message, http_code = (
+            UsuarioService().obtener_foto_usuario(usuario_id)
+        )
+
+        if ruta_archivo is None:
+            return error_response(message, http_code)
+
+        response = send_file(
+            ruta_archivo,
+            mimetype=mimetype,
+            as_attachment=False,
+            conditional=True
+        )
+        response.headers["Cache-Control"] = "private, max-age=300"
+        return response
+
+    except Exception as ex:
+        print(f"ERROR FOTO USUARIO: {ex}")
+        return error_response(
+            "No fue posible obtener la foto del usuario",
+            500
+        )

@@ -102,8 +102,9 @@ class ViajeRepository:
                     v.precio,
                     v.estado,
                     v.cupos,
+                    uu.id AS conductor_usuario_id,
                     CONCAT(uu.nombres, ' ', uu.apellidos) AS conductor_nombre,
-                    c.foto_conductor AS conductor_foto,
+                    uu.foto AS conductor_foto,
                     ve.modelo AS vehiculo_modelo,
                     ve.placa AS vehiculo_placa,
                     ve.color AS vehiculo_color

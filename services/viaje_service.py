@@ -106,7 +106,11 @@ class ViajeService:
                 "cupos": viaje["cupos"],
                 "conductor": {
                     "nombre": viaje["conductor_nombre"],
-                    "foto": viaje["conductor_foto"],
+                    "foto": (
+                        f"/api/usuarios/{viaje['conductor_usuario_id']}/foto"
+                        if viaje.get("conductor_foto")
+                        else None
+                    ),
                     "vehiculo": {
                         "modelo": viaje["vehiculo_modelo"],
                         "placa": viaje["vehiculo_placa"],

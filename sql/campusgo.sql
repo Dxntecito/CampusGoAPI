@@ -76,3 +76,19 @@ CREATE TABLE vehiculo (
     capacidad INT NOT NULL DEFAULT 4,
     CONSTRAINT fk_vehiculo_conductor FOREIGN KEY (conductor_id) REFERENCES conductor(id) ON DELETE CASCADE
 );
+
+CREATE TABLE usuario_dispositivo (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    fcm_token VARCHAR(512) NOT NULL,
+    plataforma ENUM('ANDROID','IOS') NOT NULL DEFAULT 'ANDROID',
+    nombre_dispositivo VARCHAR(120) NULL,
+    activo TINYINT(1) NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_usuario_dispositivo_fcm_token (fcm_token),
+    KEY idx_usuario_dispositivo_usuario_activo (usuario_id, activo),
+    CONSTRAINT fk_usuario_dispositivo_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE
+);

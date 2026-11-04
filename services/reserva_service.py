@@ -1,8 +1,14 @@
 from datetime import datetime
+import logging
 
 from database import get_connection
 from repositories.reserva_repository import ReservaRepository
+from firebase.fcm import notificar
 from datetime import timedelta
+
+
+logger = logging.getLogger(__name__)
+
 
 class ReservaService:
     
@@ -119,11 +125,12 @@ class ReservaService:
 
                 orden += 1
 
-            connection.commit()
+            viaje_ids = [item["viaje_id"] for item, _ in viajes_bd]
+            tokens_conductores = (
+                repository.obtener_tokens_conductores_por_viajes(viaje_ids)
+            )
 
-            return {
-                "reserva_id": reserva_id
-            }, "Reserva registrada correctamente", 201
+            connection.commit()
 
         except Exception:
             connection.rollback()
@@ -132,3 +139,16 @@ class ReservaService:
         finally:
             connection.close()
 
+        for token in tokens_conductores:
+            try:
+                notificar(
+                    token,
+                    "Nueva reserva",
+                    "Un pasajero ha realizado una reserva en uno de tus viajes."
+                )
+            except Exception:
+                logger.exception("No se pudo enviar una notificación FCM")
+
+        return {
+            "reserva_id": reserva_id
+        }, "Reserva registrada correctamente", 201

@@ -78,3 +78,27 @@ class ReservaRepository:
             ))
         finally:
             cursor.close()
+
+    def obtener_tokens_conductores_por_viajes(self, viaje_ids):
+        if not viaje_ids:
+            return []
+
+        cursor = self.connection.cursor()
+        try:
+            placeholders = ", ".join(["%s"] * len(viaje_ids))
+            sql = f"""
+                SELECT DISTINCT ud.fcm_token
+                FROM viaje AS v
+                INNER JOIN conductor AS c
+                    ON c.id = v.conductor_id
+                INNER JOIN usuario_dispositivo AS ud
+                    ON ud.usuario_id = c.usuario_id
+                WHERE v.id IN ({placeholders})
+                  AND ud.activo = 1
+                  AND ud.fcm_token IS NOT NULL
+                  AND TRIM(ud.fcm_token) <> ''
+            """
+            cursor.execute(sql, tuple(viaje_ids))
+            return [fila["fcm_token"] for fila in cursor.fetchall()]
+        finally:
+            cursor.close()

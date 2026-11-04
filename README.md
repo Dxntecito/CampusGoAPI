@@ -33,3 +33,17 @@ Las carpetas `repositories`, `routes` y `services` se entregan sin implementaci√
 - Route recibe y responde.
 - Service decide.
 - Repository consulta.
+
+## Registro de dispositivos y notificaciones
+
+La API registra el token de Firebase Cloud Messaging con `PUT /api/dispositivo`
+(requiere JWT). El JSON acepta `fcm_token`, `plataforma` y, opcionalmente,
+`nombre_dispositivo`. Cuando se crea una reserva, se notifica a los conductores
+con dispositivos activos registrados.
+
+Para una base ya creada, ejecuta una vez
+`sql/migrations/20261104_add_usuario_dispositivo.sql`; no vuelvas a ejecutar
+`sql/campusgo.sql` sobre una base con datos porque ese script recrea la base.
+En Render configura `FIREBASE_PROJECT_ID` y `FIREBASE_SERVICE_ACCOUNT_JSON`
+con los valores de la cuenta de servicio de Firebase. No subas el JSON de
+credenciales al repositorio.

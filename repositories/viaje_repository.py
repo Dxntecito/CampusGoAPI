@@ -1,12 +1,16 @@
 class ViajeRepository:
-    
+
     def __init__(self, connection):
         self.connection = connection
 
     def obtener_conductor_id_por_usuario(self, usuario_id):
         cursor = self.connection.cursor()
         try:
-            sql = "SELECT id FROM conductor WHERE usuario_id = %s"
+            sql = """
+                SELECT id
+                FROM conductor
+                WHERE usuario_id = %s
+            """
             cursor.execute(sql, (usuario_id,))
             fila = cursor.fetchone()
             return fila["id"] if fila else None
@@ -18,20 +22,35 @@ class ViajeRepository:
         try:
             sql = """
                 INSERT INTO viaje (
-                    conductor_id, origen, destino, fecha,
-                    hora, cupos, precio, estado
+                    conductor_id,
+                    origen, origen_latitud, origen_longitud,
+                    destino, destino_latitud, destino_longitud,
+                    fecha, hora, cupos, precio, estado
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, 'DISPONIBLE')
+                VALUES (
+                    %s,
+                    %s, %s, %s,
+                    %s, %s, %s,
+                    %s, %s, %s, %s,
+                    'DISPONIBLE'
+                )
             """
-            cursor.execute(sql, (
-                conductor_id,
-                datos["origen"],
-                datos["destino"],
-                datos["fecha"],
-                datos["hora"],
-                datos["cupos"],
-                datos["precio"]
-            ))
+            cursor.execute(
+                sql,
+                (
+                    conductor_id,
+                    datos["origen"],
+                    datos["origen_latitud"],
+                    datos["origen_longitud"],
+                    datos["destino"],
+                    datos["destino_latitud"],
+                    datos["destino_longitud"],
+                    datos["fecha"],
+                    datos["hora"],
+                    datos["cupos"],
+                    datos["precio"]
+                )
+            )
             return cursor.lastrowid
         finally:
             cursor.close()
@@ -41,8 +60,18 @@ class ViajeRepository:
         try:
             sql = """
                 SELECT
-                    v.id, v.origen, v.destino, v.fecha, v.hora,
-                    v.cupos, v.precio, v.estado,
+                    v.id,
+                    v.origen,
+                    v.origen_latitud,
+                    v.origen_longitud,
+                    v.destino,
+                    v.destino_latitud,
+                    v.destino_longitud,
+                    v.fecha,
+                    v.hora,
+                    v.cupos,
+                    v.precio,
+                    v.estado,
                     CONCAT(u.nombres, ' ', u.apellidos) AS conductor
                 FROM viaje v
                 INNER JOIN conductor c ON c.id = v.conductor_id
@@ -79,7 +108,8 @@ class ViajeRepository:
         try:
             sql = """
                 SELECT
-                    v.*, c.usuario_id AS conductor_usuario_id
+                    v.*,
+                    c.usuario_id AS conductor_usuario_id
                 FROM viaje v
                 INNER JOIN conductor c ON c.id = v.conductor_id
                 WHERE v.id = %s
@@ -89,78 +119,39 @@ class ViajeRepository:
         finally:
             cursor.close()
 
-    def obtener_detalle(self, viaje_id):
-        cursor = self.connection.cursor()
-        try:
-            sql_viaje = """
-                SELECT
-                    v.id,
-                    v.origen,
-                    v.destino,
-                    v.fecha,
-                    v.hora,
-                    v.precio,
-                    v.estado,
-                    v.cupos,
-                    uu.id AS conductor_usuario_id,
-                    CONCAT(uu.nombres, ' ', uu.apellidos) AS conductor_nombre,
-                    uu.foto AS conductor_foto,
-                    ve.modelo AS vehiculo_modelo,
-                    ve.placa AS vehiculo_placa,
-                    ve.color AS vehiculo_color
-                FROM viaje AS v
-                INNER JOIN conductor AS c ON c.id = v.conductor_id
-                INNER JOIN usuario AS uu ON uu.id = c.usuario_id
-                LEFT JOIN vehiculo AS ve ON ve.conductor_id = c.id
-                WHERE v.id = %s
-                LIMIT 1
-            """
-            cursor.execute(sql_viaje, (viaje_id,))
-            viaje = cursor.fetchone()
-
-            if viaje is None:
-                return None
-
-            sql_pasajeros = """
-                SELECT DISTINCT
-                    up.id,
-                    CONCAT(up.nombres, ' ', up.apellidos) AS nombre
-                FROM reserva_viaje AS rv
-                INNER JOIN reserva AS r ON r.id = rv.reserva_id
-                INNER JOIN pasajero AS p ON p.id = r.pasajero_id
-                INNER JOIN usuario AS up ON up.id = p.usuario_id
-                WHERE rv.viaje_id = %s
-                  AND rv.estado = 'CONFIRMADA'
-                  AND r.estado = 'CONFIRMADA'
-                ORDER BY up.id
-            """
-            cursor.execute(sql_pasajeros, (viaje_id,))
-            pasajeros = cursor.fetchall()
-
-            viaje["pasajeros"] = pasajeros
-            return viaje
-        finally:
-            cursor.close()
-
     def actualizar(self, viaje_id, datos):
         cursor = self.connection.cursor()
         try:
             sql = """
                 UPDATE viaje
                 SET origen = %s,
+                    origen_latitud = %s,
+                    origen_longitud = %s,
                     destino = %s,
+                    destino_latitud = %s,
+                    destino_longitud = %s,
                     fecha = %s,
                     hora = %s,
                     cupos = %s,
                     precio = %s
                 WHERE id = %s
             """
-            cursor.execute(sql, (
-                datos["origen"], datos["destino"],
-                datos["fecha"], datos["hora"],
-                datos["cupos"], datos["precio"],
-                viaje_id
-            ))
+            cursor.execute(
+                sql,
+                (
+                    datos["origen"],
+                    datos["origen_latitud"],
+                    datos["origen_longitud"],
+                    datos["destino"],
+                    datos["destino_latitud"],
+                    datos["destino_longitud"],
+                    datos["fecha"],
+                    datos["hora"],
+                    datos["cupos"],
+                    datos["precio"],
+                    viaje_id
+                )
+            )
             return cursor.rowcount
         finally:
             cursor.close()
